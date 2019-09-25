@@ -18,29 +18,39 @@
 # under the License.
 #
 # *****************************************************************************
-
-import abc
-
-import six
+from dlab_deployment.domain.service_providers import BaseIaCServiceProvider
+from dlab_deployment.infrastructure.terraform import Terraform
 
 
-@six.add_metaclass(abc.ABCMeta)
-class BaseIaCServiceProvider(object):
+class TerraformServiceProvider(BaseIaCServiceProvider):
 
-    @abc.abstractmethod
+    def __init__(self, command_executor, **kwargs):
+        """
+        :type command_executor:  BaseCommandExecutor
+        :param command_executor: Command Line Executor
+        :type parameters:  dict
+        :param parameters: CLI arguments
+        """
+
+        self.terraform = Terraform(command_executor, **kwargs)
+
     def provision(self):
-        """Provision infrastructure"""
+        """Provision terraform"""
 
-        raise NotImplementedError
+        self.terraform.initialize()
+        self.terraform.validate()
+        self.terraform.apply()
 
-    @abc.abstractmethod
     def destroy(self):
-        """Destroy infrastructure"""
+        """Deploy terraform"""
 
-        raise NotImplementedError
+        self.terraform.initialize()
+        self.terraform.validate()
+        self.terraform.destroy()
 
-    @abc.abstractmethod
     def output(self):
-        """Get provision output"""
+        """Extract terraform output
+        :rtype dict
+        """
 
-        raise NotImplementedError
+        return self.terraform.output()
